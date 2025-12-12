@@ -1,62 +1,57 @@
 import os
-import cv2
-import numpy as np
-from paddleocr import PaddleOCR
-# ----------------------------
-# OCR Text Extraction
+from .model_loader import get_ocr_model
 
+# ... (imports stay the same)
 
-def run_ocr_extraction(image_path: str, visualize: bool = False) -> str:
-    """Extract text from an image using PaddleOCR, compatible with all versions."""
-    print("Initializing PaddleOCR...")
+# ... (imports stay the same)
 
-    ocr = PaddleOCR(lang='en')
-
+def run_ocr(image_path: str) -> str:
+    """
+    Extract text from an image using the pre-loaded PaddleOCR model.
+    """
+    
     if not os.path.exists(image_path):
-        raise FileNotFoundError(f"Image not found: {image_path}")
+        print(f"Error: Image not found at {image_path}")
+        return ""
 
+    ocr = get_ocr_model()
+
+    print(f"Running OCR on {image_path}...")
     try:
-        # ✅ For PaddleOCR v4.x (newer)
-        img = cv2.imread(image_path)
-        results = ocr.predict(img)
-    except Exception:
-        # ✅ Fallback for older versions
-        results = ocr.ocr(image_path)
+        # FIX: Removed 'cls=False' entirely. 
+        # We just pass the path. This is the safest way.
+        results = ocr.ocr(image_path) 
+        
+    except Exception as e:
+        print(f"❌ Internal PaddleOCR Error: {e}")
+        return ""
 
     all_text = []
-    extracted_data = []
 
-    # Newer dict-based output
-    if isinstance(results, list) and results and isinstance(results[0], dict):
-        for res in results:
-            texts = res.get("rec_texts", [])
-            scores = res.get("rec_scores", [])
-            boxes = res.get("rec_polys", [])
-            for i in range(len(texts)):
-                extracted_data.append({
-                    "text": texts[i],
-                    "confidence": float(scores[i]),
-                    "bbox": np.array(boxes[i]).astype(int).tolist()
-                })
-                all_text.append(texts[i])
-    else:
-        # Legacy nested list format
-        for line in results:
-            for item in line:
-                txt = item[1][0]
-                conf = float(item[1][1])
-                all_text.append(txt)
-                extracted_data.append({"text": txt, "confidence": conf})
+    # SAFETY CHECK: Ensure results exist
+    if not results or results[0] is None:
+        print("⚠️ No text detected by OCR.")
+        return ""
+
+    # Loop through the detected lines
+    for line in results[0]:
+        try:
+            # Expected format: [[box_coords], ('text', confidence)]
+            if isinstance(line, list) and len(line) >= 2:
+                text_info = line[1]
+                if text_info and len(text_info) > 0:
+                    text = text_info[0]
+                    confidence = text_info[1] if len(text_info) > 1 else 0
+                    
+                    if confidence > 0.5:
+                        all_text.append(text)
+        except Exception:
+            continue
 
     extracted_text = " ".join(all_text).strip()
-
+    
     if not extracted_text:
-        extracted_text = "No text detected."
+        extracted_text = "No valid text found."
 
-    print(f"🧾 Extracted text: {extracted_text}")
-    return extracted_text 
-
-if __name__ == "__main__":
-    test_image = R"C:\Users\praga\OneDrive\Desktop\news_dataset\fake_image3.png"  # Replace with your test image path
-    extracted_text = run_ocr_extraction(test_image, visualize=False)
-    print(f"\nFinal Extracted Text:\n{extracted_text}\n")
+    print(f"🧾 Extracted text: {extracted_text[:100]}...") 
+    return extracted_text

@@ -6,7 +6,7 @@
 # Returns similarity scores and optionally helps compute TruthScore.
 
 from sentence_transformers import util
-from ..model_loader import get_embedding_model
+from .model_loader import get_embedding_model
 
 
 # from finding_credibilty import simulate_domain_check

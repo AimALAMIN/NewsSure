@@ -1,4 +1,4 @@
-from ..model_loader import get_summarizer_model, get_gemini_model
+from .model_loader import get_summarizer_model, get_gemini_model
 import nltk
 import google.generativeai as genai
 from sumy.parsers.plaintext import PlaintextParser
@@ -30,6 +30,7 @@ def filter_relevant_sentences(claim, text, top_k=5):
     if len(relevant) < top_k:
         relevant = sentences[:top_k]
     return " ".join(relevant)
+
 
 def summarize_local(text):
     try:
@@ -89,7 +90,6 @@ def summarize_with_gemini(claim: str, text: str) -> str:
     except Exception as e:
         print(f"⚠️ Gemini summarization failed: {e}")
         return summarize_local(text)
-
 
 
 def summarize_article(claim, text):
@@ -152,7 +152,7 @@ def summarize_all_articles(claim, extracted_data):
         "summaries": summarized_articles
     }
 
-# summarisig multiple  article 
+# summarizing multiple article 
 if __name__ == "__main__":
     # Example usage
     claim_example = "The Eiffel Tower is located in Berlin."

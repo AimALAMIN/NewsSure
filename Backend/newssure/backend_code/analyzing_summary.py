@@ -1,4 +1,4 @@
-from ..model_loader import get_classifier_model
+from .model_loader import get_classifier_model
 import numpy as np
 
 # ------------------------------------------------------------
@@ -8,21 +8,6 @@ classifier = get_classifier_model()
 # ------------------------------------------------------------
 # 🧩 Helper Functions
 # ------------------------------------------------------------
-def classify_claim_evidence(claim, evidence):
-    result = classifier(f"Premise: {evidence} Hypothesis: {claim}", top_k=None)
-    if isinstance(result, list):
-        result = result[0]
-    label = result["label"].lower()
-    score = result["score"]
-
-    if label == "entailment":
-        meaning = "supports"
-    elif label == "contradiction":
-        meaning = "refutes"
-    else:
-        meaning = "neutral"
-
-    return meaning, round(score * 100, 2)
 
 
 def classify_claim_evidence(claim, evidence):

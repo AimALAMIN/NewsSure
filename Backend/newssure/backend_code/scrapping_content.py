@@ -1,4 +1,4 @@
-from ..model_loader import get_gemini_model
+from .model_loader import get_gemini_model
 import requests
 from bs4 import BeautifulSoup
 from newspaper import Article
@@ -72,8 +72,8 @@ def extract_with_gemini(url):
 # ------------------------------------------------------------
 # ✅ FIXED: Handle multiple article objects (with credibility metadata)
 # ------------------------------------------------------------
-def extract_article(claim, articles):
-    """
+
+"""
     Extracts article content while preserving credibility metadata.
     Input:
         articles (list): list of dicts from semantic stage, each with
@@ -81,6 +81,8 @@ def extract_article(claim, articles):
     Output:
         dict: structured content extraction result for summarization
     """
+
+def extract_article(claim, articles):  
 
     all_results = []
 
