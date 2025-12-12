@@ -7,7 +7,6 @@ import { Header } from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-// 👇 Import your new component here
 // import BookExpertCall from "@/components/BookExpertCall";
 
 const Index = () => {

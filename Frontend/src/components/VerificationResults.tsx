@@ -55,11 +55,11 @@ export const VerificationResults = ({ data }: VerificationResultsProps) => {
   const handleShare = () => {
     navigate('/share-card', {
       state: {
-        score: 50, // Your actual score
-        claim: "Your claim text", // The claim text
-        sources: ['Reuters', 'BBC', 'NDTV'], // Your sources array
-        explanation: "Your verification explanation text",
-        verifiedDate: new Date().toLocaleString('en-IN', {
+        score: data.truthScore,
+        claim: data.claim,
+        sources: data.sources.map(s => s.name),
+        explanation: data.explanation,
+        verifiedDate: new Date(data.timestamp).toLocaleString('en-IN', {
           year: 'numeric',
           month: 'short',
           day: 'numeric',

@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Chrome } from "lucide-react";
-import newssureLogo from "@/assets/newssure_logo.jpg";
+import newssureLogo from "@/assets/favicon.ico";
 
 const Auth = () => {
   const navigate = useNavigate();
