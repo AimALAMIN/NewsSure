@@ -27,7 +27,7 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-const DJANGO_API_URL = "http://127.0.0.1:8000/api/verify/"; // ✅ Backend endpoint
+const DJANGO_API_URL = "https://8000-01kc8n9ewxaeqxywk9cf7c23nm.cloudspaces.litng.ai/api/check-news/"; // ✅ Backend endpoint
 
 const handleVerify = async (file: File | string, inputType: 'text' | 'image') => {
   setIsVerifying(true);
@@ -51,7 +51,7 @@ const handleVerify = async (file: File | string, inputType: 'text' | 'image') =>
       response = await fetch(DJANGO_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: file, inputType }),
+        body: JSON.stringify({ text: file }),
       });
     }
 

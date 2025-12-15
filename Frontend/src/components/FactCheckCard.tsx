@@ -11,7 +11,7 @@ interface VerificationSource {
 const FactCheckCard = () => {
   const truthScore = 82;
   
-  const verificationSources: VerificationSource[] = [
+  const verification: VerificationSource[] = [
     { name: "Reuters", initial: "R", bgColor: "#ef4444" },
     { name: "BBC", initial: "B", bgColor: "#1e3a8a" },
     { name: "NDTV", initial: "N", bgColor: "#ea580c" },
@@ -263,13 +263,13 @@ const FactCheckCard = () => {
             </p>
           </div>
 
-          {/* Verification Sources */}
+          {/* Verification  */}
           <div style={{ marginBottom: '1.5rem' }}>
             <p style={{ fontSize: '11px', color: 'hsl(var(--muted-foreground))', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>
-              Verified Sources
+              Verified 
             </p>
             <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
-              {verificationSources.map((source, index) => (
+              {verification.map((source, index) => (
                 <div
                   key={index}
                   style={{

@@ -212,7 +212,7 @@ if __name__ == "__main__":
             },
             {
                 "url": "https://randomblog.net/eiffel",
-                "summary": "Some sources falsely claimed it was in Berlin, but official reports confirm it is in Paris.",
+                "summary": "Some  falsely claimed it was in Berlin, but official reports confirm it is in Paris.",
                 "credibility": 60,
                 "trust_label": "Mostly Reliable",
                 "weight": 0.7,
