@@ -34,8 +34,8 @@ def get_gemini_model():
     if not _gemini_configured and api_key:
         genai.configure(api_key=api_key)
         _gemini_configured = True
-    # 'gemini-pro' is best for pure text tasks
-    return genai.GenerativeModel('gemini-pro')
+    
+    return genai.GenerativeModel('gemini-2.0-flash')
 
 # 2. VISION MODEL (For Image Verification) - ADD THIS NEW FUNCTION
 def get_gemini_vision_model():
@@ -45,8 +45,8 @@ def get_gemini_vision_model():
     if not _gemini_configured and api_key:
         genai.configure(api_key=api_key)
         _gemini_configured = True
-    # 'gemini-1.5-flash' handles images perfectly
-    return genai.GenerativeModel('gemini-1.5-flash')
+    
+    return genai.GenerativeModel('gemini-2.0-flash')
 
 
 def get_embedding_model():

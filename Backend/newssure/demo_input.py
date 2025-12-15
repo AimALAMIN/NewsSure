@@ -1,6 +1,6 @@
 """
 ============================================================
-TruthScope - AI + Community-Driven News Verification System
+NewsSure - AI + Community-Driven News Verification System
 ============================================================
 Unified Workflow:
     1 - Input Handling (Text / Image)

@@ -16,7 +16,7 @@ try:
     from newssure.backend_code.finding_credibility import simulate_domain_check
     from newssure.backend_code.embedding_filtering import find_semantic_matches
     from newssure.backend_code.scrapping_content import extract_article
-    from newssure.backend_code.summarizing_content import summarize_all_articles
+    
     from newssure.backend_code.analyzing_summary import verify_claim_from_text 
 except ImportError as e:
     print(f"⚠️ PIPELINE IMPORT ERROR: {e}")
@@ -98,6 +98,7 @@ class CheckNewsView(APIView):
 
             # --- STEP 5: SUMMARIZING ---
             print("--- [5] Summarizing ---")
+            from newssure.backend_code.summarizing_content import summarize_all_articles
             summary_analysis = summarize_all_articles(final_claim, scraped_data)
 
             # --- STEP 6: FINAL VERDICT (The Logic You Just Added) ---

@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 
 session = requests.Session()
 session.headers.update({
-    "User-Agent": "Mozilla/5.0 (compatible; TruthScopeBot/1.0; +https://truthscope.ai)"
+    "User-Agent": "Mozilla/5.0 (compatible; NewsSureBot/1.0; +https://NewsSure.ai)"
 })
 
 # ------------------------------------------------------------

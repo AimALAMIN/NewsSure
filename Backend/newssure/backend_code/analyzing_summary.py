@@ -31,55 +31,52 @@ def classify_claim_evidence(claim, evidence):
 
     return meaning, round(score * 100, 2)
 
-
+# ------------------------------------------------------------
+# 🔍 1. Enhanced Analysis Logic (Fixes "Not in Berlin" bug)
+# ------------------------------------------------------------
 def analyze_claim_vs_summary(claim, summary):
-    """
-    Adds rule-based enhancement to fix NLI misclassification when
-    the article clearly denies, contradicts, or disproves a claim.
-    """
     text = summary.lower()
-
-    # Explicit cues of refutation or denial
+    
+    # 🔴 AGGRESSIVE REFUTE LIST (Added "not in", "instead of", "incorrect")
     refute_keywords = [
         "fake", "false", "denied", "refuted", "clarified", "no such",
         "fabricated", "not true", "incorrect", "contradict", "disprove",
-        "debunk", "denies", "myth", "hoax", "isn't", "is not", "wasn't"
+        "debunk", "denies", "myth", "hoax", "isn't", "is not", "wasn't",
+        "not in", "instead of", "misleading", "baseless"
     ]
+    
     support_keywords = [
         "confirmed", "agreed", "verified", "approved", "affirmed",
         "announced", "declared", "supports", "proves", "true", "confirmed that"
     ]
 
-    # Pre-label biasing before NLI
+    # Rule-Based Check
+    rule_relation = None
     if any(k in text for k in refute_keywords):
         rule_relation = "refutes"
     elif any(k in text for k in support_keywords):
         rule_relation = "supports"
-    else:
-        rule_relation = None
 
-    # Run NLI model
+    # AI Model Check
     model_relation, conf = classify_claim_evidence(claim, summary)
 
-    # Combine model + rule logic
-    if rule_relation and model_relation != rule_relation:
-        # Override only if explicit contradiction terms are present
-        if rule_relation == "refutes":
-            model_relation, conf = "refutes", min(conf + 20, 100)
-        elif rule_relation == "supports":
-            model_relation, conf = "supports", min(conf + 10, 100)
-
-    # Ensure high certainty for obvious contradictions
-    if model_relation == "neutral" and rule_relation:
-        model_relation = rule_relation
-        conf = min(conf + 25, 100)
+    # ⚡ VETO POWER: If keywords say "REFUTES", we force it, 
+    # because AI often misses small words like "not".
+    if rule_relation == "refutes":
+        final_relation = "refutes"
+        final_conf = max(conf, 90) # Force high confidence
+    elif rule_relation == "supports" and model_relation == "supports":
+        final_relation = "supports"
+        final_conf = max(conf, 85)
+    else:
+        final_relation = model_relation
+        final_conf = conf
 
     return {
-        "relation": model_relation,
-        "confidence": conf,
+        "relation": final_relation,
+        "confidence": final_conf,
         "summary": summary
     }
-
 
 # ------------------------------------------------------------
 # 🧮 Aggregation & Final Verdict
@@ -134,66 +131,75 @@ def aggregate_results(results):
 
 
 
+
 # ------------------------------------------------------------
 # 🔗 Main Integration – Multi-URL Summary Handling
 # ------------------------------------------------------------
+           
 def verify_claim_from_text(claim_text: str, summarized_output: dict):
-    """
-    Takes the claim and multi-URL summaries (from summarize_all_articles),
-    analyzes each summary independently, and aggregates the overall verdict.
-    """
+    # 🔴 DEBUG PRINT: If you don't see this in terminal, YOU ARE EDITING THE WRONG FILE
+    print(f"--- ⚡ RUNNING NEW LOGIC FOR: {claim_text} ---")
+
     if not summarized_output or not summarized_output.get("summaries"):
         return {"error": "No summaries to analyze."}
 
     results = []
-
+    
+    # Analyze all summaries
     for art in summarized_output["summaries"]:
-        url = art.get("url")
         summary = art.get("summary", "")
-        credibility = art.get("credibility", 50)
-        trust_label = art.get("trust_label", "Unknown")
-        similarity = art.get("similarity", 0.0)
-        weight = art.get("weight", 0.5)
-
-        if not summary.strip():
-            continue
+        if not summary.strip(): continue
 
         analysis = analyze_claim_vs_summary(claim_text, summary)
         analysis.update({
-            "url": url,
-            "credibility": credibility,
-            "trust_label": trust_label,
-            "similarity": similarity,
-            "weight": weight
+            "url": art.get("url"),
+            "credibility": art.get("credibility", 50),
+            "similarity": art.get("similarity", 0.0),
+            "weight": art.get("weight", 0.5)
         })
         results.append(analysis)
 
     final_verdict, avg_conf, stance_score = aggregate_results(results)
     avg_conf = float(avg_conf)
 
-
-    # Weighted truth score considering confidence, credibility, similarity, and weight
-    truth_score = np.mean([
-        (
-            0.5 * r["confidence"] +                # AI confidence (main driver)
-            0.2 * r["credibility"] +               # Source credibility
-            0.2 * (r["similarity"] * 100) +        # Semantic similarity (scaled to 0–100)
-            0.1 * (r.get("weight", 0.5) * 100)     # User-defined or system weight
-        )
+    # --- 🧮 TRUTH SCORE CALCULATION ---
+    
+    # Base Score (Content Quality)
+    raw_score = np.mean([
+        (0.7 * r["confidence"] + 0.2 * r["credibility"] + 0.1 * (r["similarity"] * 100))
         for r in results
     ]) if results else 0
-    
-    truth_score = float(round(min(truth_score, 100), 2))
+    raw_score = float(round(min(raw_score, 100), 2))
+
+    # 🚀 LOGIC FOR "FALSE" CLAIMS
+    if final_verdict == "REFUTES":
+        # If verdict is REFUTES, the Truth Score must be LOW.
+        # We invert the confidence: 90% Confident False = 10% Truth Score.
+        # We use avg_conf because raw_score might be low due to credibility.
+        base_confidence = max(raw_score, avg_conf)
+        truth_score = max(0, 100 - base_confidence)
+        
+    # 🚀 LOGIC FOR "TRUE" CLAIMS
+    elif final_verdict == "SUPPORTS":
+        # If AI is super sure (>85%), ignore low credibility blogs
+        if avg_conf > 85:
+            truth_score = max(raw_score, avg_conf)
+        else:
+            truth_score = raw_score
+            
+    # NEUTRAL
+    else:
+        truth_score = 50
 
     return {
         "claim": claim_text,
         "final_verdict": final_verdict,
-        "truthScore": truth_score,
+        "truthScore": float(round(truth_score, 2)),
         "average_confidence": avg_conf,
-        "weighted_stance_score": stance_score,
-        "reliable_sources": results
-    }
-
+        "reliable_sources": results,
+        # Pass explanation from the first reliable source
+        "explanation": results[0]["summary"] if results else "Analysis complete."
+    }  
 
 # ------------------------------------------------------------
 # 🧪 Example Test
