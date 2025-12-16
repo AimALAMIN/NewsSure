@@ -1,4 +1,4 @@
-# TruthScope Stage 5 – Domain Credibility Scoring + Weight Assignment
+# Stage 5 – Domain Credibility Scoring + Weight Assignment
 # ---------------------------------------------------------------
 # Uses MBFC dataset to compute credibility scores for retrieved articles
 # Combines bias, factual reporting, and credibility into a weighted score (0–100)

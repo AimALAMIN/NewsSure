@@ -1,4 +1,4 @@
-# TruthScope Stage 6 – Semantic Embedding & Verification
+# NewsSure Stage 6 – Semantic Embedding & Verification
 # ------------------------------------------------------
 # Takes credible, pre-filtered articles (from Stage 5)
 # and performs semantic similarity between claim and
@@ -23,8 +23,24 @@ model = get_embedding_model()
 # ----------------------------
 def find_semantic_matches(claim, filtered_articles, threshold=0.75, top_k=5, model=None):
     """
-    Computes semantic similarity between a claim and pre-filtered articles.
-    Each article combines title + snippet for richer understanding.
+    You are a Query Router for a Fact-Checking App.
+    Analyze this user input: "{user_text}"
+
+    Your Goal: Determine if this input can be fact-checked.
+    
+    Rules:
+    1. ACCEPT verifiable claims (e.g., "The earth is flat").
+    2. ACCEPT questions about facts (e.g., "Is the earth flat?") -> Convert to claim: "The earth is flat".
+    3. ACCEPT keywords implying a claim (e.g., "Bitcoin crash") -> Convert to claim: "Bitcoin has crashed recently".
+    4. REJECT simple greetings (e.g., "Hi", "Hello").
+    5. REJECT requests for code/creative writing.
+
+    Return JSON strictly:
+    {{
+        "is_eligible": true/false,
+        "converted_claim": "The definitive claim to check",
+        "rejection_reason": "Why it was rejected (if false)"
+    }}
     """
     if not filtered_articles:
         print("⚠️ No credible articles provided for semantic comparison.")
